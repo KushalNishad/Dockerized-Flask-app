@@ -1,42 +1,18 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
-from functools import wraps
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import pymysql
 import matplotlib.pyplot as plt
 import os
 from database.db_config import get_db_connection
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'  # Change this in production!
 
-# --- Decorator to protect routes ---
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'logged_in' not in session:
-            flash('You need to log in first.')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
+# --- Home (Now direct dashboard) ---
+@app.route('/')
+def home():
+    return redirect(url_for('dashboard'))
 
-# --- Home (Login) Page ---
-@app.route('/', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        if request.form['username'] == 'admin' and request.form['password'] == 'password':
-            session['logged_in'] = True
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid credentials.')
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-# --- Dashboard (After login) ---
+# --- Dashboard (No login required) ---
 @app.route('/dashboard')
-@login_required
 def dashboard():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -64,7 +40,6 @@ def dashboard():
 
 # --- Create DB Table ---
 @app.route('/create_table', methods=['GET'])
-@login_required
 def create_table():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -83,7 +58,6 @@ def create_table():
 
 # --- Add Transaction ---
 @app.route('/add_transaction', methods=['POST'])
-@login_required
 def add_transaction():
     user_name = request.form['user_name']
     amount = request.form['amount']
@@ -101,7 +75,6 @@ def add_transaction():
 
 # --- API to list all transactions ---
 @app.route('/transactions', methods=['GET'])
-@login_required
 def transactions():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -111,4 +84,4 @@ def transactions():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=5000)
