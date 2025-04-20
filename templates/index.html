@@ -5,57 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fintech Transaction System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Add Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
-        <!-- Login Form -->
-        <div id="login-form">
-            <h1>Login to Fintech System</h1>
-            <form action="/login" method="POST">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required><br>
+        <!-- Transaction Form -->
+        <h1>Fintech Transaction System</h1>
+        <form action="/add_transaction" method="POST">
+            <label for="user_name">User Name:</label>
+            <input type="text" id="user_name" name="user_name" required><br>
 
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required><br>
+            <label for="amount">Amount (USD):</label>
+            <input type="number" id="amount" name="amount" required><br>
 
-                <input type="submit" value="Login">
-            </form>
-        </div>
+            <input type="submit" value="Add Transaction">
+        </form>
 
-        <!-- Transaction Form (hidden until login) -->
-        <div id="transaction-form" style="display:none;">
-            <h1>Fintech Transaction System</h1>
-            <form action="/add_transaction" method="POST">
-                <label for="user_name">User Name:</label>
-                <input type="text" id="user_name" name="user_name" required><br>
+        <hr>
 
-                <label for="amount">Amount (USD):</label>
-                <input type="number" id="amount" name="amount" required><br>
+        <h2>Transaction History</h2>
+        <button onclick="loadTransactions()">Load Transactions</button>
+        <ul id="transaction-list"></ul>
 
-                <input type="submit" value="Add Transaction">
-            </form>
+        <hr>
 
-            <hr>
-
-            <h2>Transaction History</h2>
-            <button onclick="loadTransactions()">Load Transactions</button>
-            <ul id="transaction-list"></ul>
-
-            <hr>
-
-            <h2>Transaction Statistics</h2>
-            <canvas id="transaction-chart" width="400" height="200"></canvas>
-        </div>
+        <h2>Transaction Statistics</h2>
+        <canvas id="transaction-chart" width="400" height="200"></canvas>
     </div>
 
     <script>
-        // Function to show transaction form after login
-        function showTransactionForm() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('transaction-form').style.display = 'block';
-        }
-
         // Fetch and display transaction history
         function loadTransactions() {
             fetch('/transactions')
@@ -64,27 +42,28 @@
                     const transactionList = document.getElementById('transaction-list');
                     transactionList.innerHTML = ''; // Clear previous list
                     let amounts = [];
-                    data.forEach(transaction => {
+                    let labels = [];
+
+                    data.forEach((transaction, index) => {
                         const li = document.createElement('li');
                         li.textContent = `User: ${transaction.user_name}, Amount: $${transaction.amount}, Date: ${transaction.transaction_date}`;
                         transactionList.appendChild(li);
 
-                        // Add amounts for visualization
+                        labels.push(transaction.user_name);
                         amounts.push(transaction.amount);
                     });
 
-                    // Create chart
-                    createChart(amounts);
+                    createChart(labels, amounts);
                 });
         }
 
         // Create bar chart for transaction amounts
-        function createChart(amounts) {
+        function createChart(labels, amounts) {
             const ctx = document.getElementById('transaction-chart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: Array(amounts.length).fill('Transaction'), // Label for each bar
+                    labels: labels,
                     datasets: [{
                         label: 'Transaction Amounts (USD)',
                         data: amounts,
@@ -94,6 +73,7 @@
                     }]
                 },
                 options: {
+                    responsive: true,
                     scales: {
                         y: {
                             beginAtZero: true
@@ -102,13 +82,6 @@
                 }
             });
         }
-
-        // Simulating login success (replace with actual authentication logic)
-        document.querySelector("form[action='/login']").addEventListener("submit", function(event) {
-            event.preventDefault();
-            // Example: after successful login
-            showTransactionForm();
-        });
     </script>
 </body>
 </html>
