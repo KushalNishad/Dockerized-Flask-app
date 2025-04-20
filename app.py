@@ -1,14 +1,70 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
+from functools import wraps
 import pymysql
+import matplotlib.pyplot as plt
+import os
 from database.db_config import get_db_connection
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key_here'  # Change this in production!
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# --- Decorator to protect routes ---
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session:
+            flash('You need to log in first.')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
+# --- Home (Login) Page ---
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form['username'] == 'admin' and request.form['password'] == 'password':
+            session['logged_in'] = True
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid credentials.')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+# --- Dashboard (After login) ---
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT user_name, amount FROM transactions ORDER BY transaction_date DESC LIMIT 10")
+    transactions = cursor.fetchall()
+    connection.close()
+
+    # Prepare data for chart
+    users = [row[0] for row in transactions]
+    amounts = [float(row[1]) for row in transactions]
+
+    # Create chart
+    plt.figure(figsize=(8, 4))
+    plt.bar(users, amounts, color='skyblue')
+    plt.title('Latest Transactions')
+    plt.xlabel('User')
+    plt.ylabel('Amount')
+    plt.xticks(rotation=45)
+    chart_path = os.path.join('static', 'chart.png')
+    plt.tight_layout()
+    plt.savefig(chart_path)
+    plt.close()
+
+    return render_template('dashboard.html', transactions=transactions, chart='chart.png')
+
+# --- Create DB Table ---
 @app.route('/create_table', methods=['GET'])
+@login_required
 def create_table():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -25,11 +81,13 @@ def create_table():
     connection.close()
     return "Table created successfully!"
 
+# --- Add Transaction ---
 @app.route('/add_transaction', methods=['POST'])
+@login_required
 def add_transaction():
     user_name = request.form['user_name']
     amount = request.form['amount']
-    
+
     connection = get_db_connection()
     cursor = connection.cursor()
     insert_query = """
@@ -39,9 +97,11 @@ def add_transaction():
     cursor.execute(insert_query, (user_name, amount))
     connection.commit()
     connection.close()
-    return "Transaction added successfully!"
+    return redirect(url_for('dashboard'))
 
+# --- API to list all transactions ---
 @app.route('/transactions', methods=['GET'])
+@login_required
 def transactions():
     connection = get_db_connection()
     cursor = connection.cursor()
