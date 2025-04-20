@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head><title>Dashboard</title></head>
+<body>
+    <h2>Dashboard</h2>
+    <img src="{{ url_for('static', filename=chart) }}" alt="Chart" style="max-width: 600px;">
+    <h3>Recent Transactions</h3>
+    <ul>
+        {% for t in transactions %}
+            <li>{{ t[0] }} → ${{ t[1] }}</li>
+        {% endfor %}
+    </ul>
+    <h4>Add New Transaction</h4>
+    <form method="POST" action="{{ url_for('add_transaction') }}">
+        User: <input name="user_name"><br>
+        Amount: <input name="amount"><br>
+        <input type="submit" value="Add">
+    </form>
+    <br>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>
