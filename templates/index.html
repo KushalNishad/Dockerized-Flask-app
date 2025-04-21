@@ -1,163 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spending Tracker - Friend's Transactions</title>
-    <!-- Bootstrap CSS for styling -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Custom styling for the page */
-        body {
-            background-color: #f4f8fb;
-            font-family: 'Arial', sans-serif;
-        }
-        .container {
-            margin-top: 30px;
-        }
-        .friend-list {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .friend-list ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .friend-list li {
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-        .friend-list li span {
-            font-weight: bold;
-            color: #007bff;
-        }
-        .spending-chart {
-            margin-top: 40px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .header img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Friend's Spending Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+
+  <style>
+    body {
+      background: linear-gradient(to right, #1e3c72, #2a5298); /* Fading blue */
+      font-family: 'Arial', sans-serif;
+      color: #fff;
+    }
+
+    .container {
+      margin-top: 30px;
+    }
+
+    .friend-list {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #ffffffdd;
+      border-radius: 10px;
+      color: #333;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .friend-list ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .friend-list li {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .friend-list li span {
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .spending-chart {
+      margin-top: 40px;
+      background-color: #ffffffdd;
+      padding: 20px;
+      border-radius: 10px;
+      color: #333;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .header img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      color: #fff;
+    }
+
+    footer i {
+      font-size: 1.5rem;
+      margin: 0 10px;
+      color: #fff;
+    }
+
+    footer i:hover {
+      color: #ffd700;
+    }
+
+    .spending-form {
+      margin-top: 30px;
+      background-color: #ffffffdd;
+      padding: 20px;
+      border-radius: 10px;
+      color: #333;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header Section -->
-        <div class="header">
-            <h1 class="text-center text-primary">Friend's Spending Tracker</h1>
-            <div class="text-center">
-                <img src="https://media.giphy.com/media/3o6nVw09dDmvE8QTwM/giphy.gif" alt="Spending Tracker" />
-            </div>
-        </div>
-
-        <!-- Add Transaction Form -->
-        <div class="spending-form">
-            <h3>Add New Transaction</h3>
-            <form action="/add_transaction" method="POST" class="mb-4">
-                <div class="mb-3">
-                    <label for="user_name" class="form-label">User Name</label>
-                    <input type="text" class="form-control" id="user_name" name="user_name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="amount" class="form-label">Amount (USD)</label>
-                    <input type="number" class="form-control" id="amount" name="amount" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Add Transaction</button>
-            </form>
-        </div>
-
-        <hr>
-
-        <!-- Friends' Spending History & Statistics -->
-        <div class="row">
-            <div class="col-md-4">
-                <div class="friend-list">
-                    <h4>Top 5 Friends' Spending</h4>
-                    <ul id="friend-list">
-                        <!-- Dynamically added list of friends with spending will go here -->
-                        {% for friend in friends %}
-                            <li><span>{{ friend.user_name }}:</span> ${{ friend.total_spent }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-            <div class="col-md-8">
-                <div class="spending-chart">
-                    <h4>Transaction Statistics (Spending by Friends)</h4>
-                    <canvas id="spending-chart" width="400" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <hr>
-
-        <!-- Transaction History Section -->
-        <h3>Transaction History</h3>
-        <button onclick="loadTransactions()" class="btn btn-success mb-4">Load Transactions</button>
-        <ul id="transaction-list" class="list-group">
-            <!-- Transaction history will be dynamically loaded here -->
-        </ul>
+  <div class="container">
+    <!-- Header -->
+    <div class="header text-center">
+      <h1 class="text-light">Friend's Spending Tracker</h1>
+      <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExemg2anVxcmd5M294N2UwOTVhNTRsdWY4eXBlMmp3ZDdvb2x6MzB3cSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/lKrW50iUBJkQ89JLBc/giphy.gif" alt="Spending Tracker" />
     </div>
 
-    <script>
-        // Fetch and display transaction history
-        function loadTransactions() {
-            fetch('/transactions')
-                .then(response => response.json())
-                .then(data => {
-                    const transactionList = document.getElementById('transaction-list');
-                    transactionList.innerHTML = ''; // Clear previous list
-                    let amounts = [];
-                    let labels = [];
+    <!-- Transaction Form -->
+    <div class="spending-form">
+      <h3>Add New Transaction</h3>
+      <form action="/add_transaction" method="POST">
+        <div class="mb-3">
+          <label for="user_name" class="form-label">User Name</label>
+          <input type="text" class="form-control" id="user_name" name="user_name" required />
+        </div>
+        <div class="mb-3">
+          <label for="amount" class="form-label">Amount (USD)</label>
+          <input type="number" class="form-control" id="amount" name="amount" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Add Transaction</button>
+      </form>
+    </div>
 
-                    data.forEach((transaction) => {
-                        const li = document.createElement('li');
-                        li.classList.add('list-group-item');
-                        li.textContent = `User: ${transaction.user_name}, Amount: $${transaction.amount}, Date: ${transaction.transaction_date}`;
-                        transactionList.appendChild(li);
+    <hr />
 
-                        labels.push(transaction.user_name);
-                        amounts.push(transaction.amount);
-                    });
+    <!-- Stats Section -->
+    <div class="row">
+      <div class="col-md-4">
+        <div class="friend-list">
+          <h4 class="text-primary">Top 5 Big Spenders</h4>
+          <ul>
+            {% for friend in friends %}
+              <li><span>{{ friend.user_name }}</span> spent <strong>${{ friend.total_spent }}</strong> on <em>{{ friend.item }}</em></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="spending-chart">
+          <h4 class="text-primary">Transaction Statistics</h4>
+          <canvas id="spending-chart" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </div>
 
-                    createChart(labels, amounts);
-                });
+    <hr />
+
+    <!-- Transaction History -->
+    <h3 class="text-light">Transaction History</h3>
+    <button onclick="loadTransactions()" class="btn btn-warning mb-4">Load Transactions</button>
+    <ul id="transaction-list" class="list-group"></ul>
+
+    <!-- Footer -->
+    <footer class="mt-5">
+      <p>Made with <span style="color: red;">❤️</span> by Kushal Nishad</p>
+      <a href="https://github.com/KushalNishad" target="_blank"><i class="fab fa-github"></i></a>
+      <a href="https://www.linkedin.com/in/kushal-nishad/" target="_blank"><i class="fab fa-linkedin"></i></a>
+    </footer>
+  </div>
+
+  <script>
+    // Fetch transactions
+    function loadTransactions() {
+      fetch('/transactions')
+        .then(response => response.json())
+        .then(data => {
+          const transactionList = document.getElementById('transaction-list');
+          transactionList.innerHTML = '';
+          let amounts = [];
+          let labels = [];
+
+          data.forEach((t) => {
+            const li = document.createElement('li');
+            li.classList.add('list-group-item');
+            li.textContent = `User: ${t.user_name}, Amount: $${t.amount}, Date: ${t.transaction_date}`;
+            transactionList.appendChild(li);
+
+            labels.push(t.user_name);
+            amounts.push(t.amount);
+          });
+
+          createChart(labels, amounts);
+        });
+    }
+
+    // Draw chart
+    function createChart(labels, amounts) {
+      const ctx = document.getElementById('spending-chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Amount (USD)',
+            data: amounts,
+            backgroundColor: 'rgba(0, 123, 255, 0.6)',
+            borderColor: 'rgba(0, 123, 255, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
         }
-
-        // Create bar chart for transaction amounts
-        function createChart(labels, amounts) {
-            const ctx = document.getElementById('spending-chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Transaction Amounts (USD)',
-                        data: amounts,
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-    </script>
+      });
+    }
+  </script>
 </body>
 </html>
