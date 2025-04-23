@@ -10,39 +10,13 @@
 
   <style>
     body {
-      background: linear-gradient(to right, #1e3c72, #2a5298); /* Fading blue */
+      background: linear-gradient(to right, #1e3c72, #2a5298);
       font-family: 'Arial', sans-serif;
       color: #fff;
     }
-
     .container {
       margin-top: 30px;
     }
-
-    .friend-list {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #ffffffdd;
-      border-radius: 10px;
-      color: #333;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-
-    .friend-list ul {
-      list-style-type: none;
-      padding: 0;
-    }
-
-    .friend-list li {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    .friend-list li span {
-      font-weight: bold;
-      color: #007bff;
-    }
-
     .spending-chart {
       margin-top: 40px;
       background-color: #ffffffdd;
@@ -51,29 +25,24 @@
       color: #333;
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
-
     .header img {
       max-width: 100%;
       height: auto;
       border-radius: 10px;
     }
-
     footer {
       margin-top: 40px;
       text-align: center;
       color: #fff;
     }
-
     footer i {
       font-size: 1.5rem;
       margin: 0 10px;
       color: #fff;
     }
-
     footer i:hover {
       color: #ffd700;
     }
-
     .spending-form {
       margin-top: 30px;
       background-color: #ffffffdd;
@@ -110,24 +79,10 @@
 
     <hr />
 
-    <!-- Stats Section -->
-    <div class="row">
-      <div class="col-md-4">
-        <div class="friend-list">
-          <h4 class="text-primary">Top 5 Big Spenders</h4>
-          <ul>
-            {% for friend in friends %}
-              <li><span>{{ friend.user_name }}</span> spent <strong>${{ friend.total_spent }}</strong> on <em>{{ friend.item }}</em></li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-      <div class="col-md-8">
-        <div class="spending-chart">
-          <h4 class="text-primary">Transaction Statistics</h4>
-          <canvas id="spending-chart" width="400" height="200"></canvas>
-        </div>
-      </div>
+    <!-- Stats Section (Chart Only) -->
+    <div class="spending-chart">
+      <h4 class="text-primary">Transaction Statistics</h4>
+      <canvas id="spending-chart" width="400" height="200"></canvas>
     </div>
 
     <hr />
@@ -146,7 +101,6 @@
   </div>
 
   <script>
-    // Fetch transactions
     function loadTransactions() {
       fetch('/transactions')
         .then(response => response.json())
@@ -170,7 +124,6 @@
         });
     }
 
-    // Draw chart
     function createChart(labels, amounts) {
       const ctx = document.getElementById('spending-chart').getContext('2d');
       new Chart(ctx, {

@@ -5,20 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-   
-    connection = get_db_connection()
-    cursor = connection.cursor()
-    cursor.execute("""
-        SELECT user_name, SUM(amount) AS total_spent
-         FROM transactions
-        GROUP BY user_name
-        ORDER BY total_spent DESC
-        LIMIT 5
-        """)
-    friends = cursor.fetchall()
-    connection.close()
-
-    return render_template('index.html', friends=friends)
+    return render_template('index.html')
 
 @app.route('/create_table', methods=['GET'])
 def create_table():
