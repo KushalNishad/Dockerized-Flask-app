@@ -6,24 +6,16 @@ app = Flask(__name__)
 @app.route('/')
 def index():
    
-    #connection = get_db_connection()
-    #cursor = connection.cursor()
-    #cursor.execute("""
-     #   SELECT user_name, SUM(amount) AS total_spent
-      # GROUP BY user_name
-       # ORDER BY total_spent DESC
-        #LIMIT 5
-    #""")
-    #friends = cursor.fetchall()
-    #connection.close()
-
-    friends = [
-        {'user_name': 'Krupal', 'item':'Shaadi', 'total_spent': 50000},
-        {'user_name': 'Karan', 'item':'Marshall', 'total_spent': 700},
-        {'user_name': 'Naynesh', 'item':'Hookah', 'total_spent': 500},
-        {'user_name': 'Tanmay', 'item':'Hookah', 'total_spent': 400},
-        {'user_name': 'Heer', 'item':'Picnic', 'total_spent': 150},
-    ]
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    cursor.execute("""
+        SELECT user_name, SUM(amount) AS total_spent
+        GROUP BY user_name
+        ORDER BY total_spent DESC
+        LIMIT 5
+        """)
+    friends = cursor.fetchall()
+    connection.close()
 
     return render_template('index.html', friends=friends)
 
