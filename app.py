@@ -10,6 +10,7 @@ def index():
     cursor = connection.cursor()
     cursor.execute("""
         SELECT user_name, SUM(amount) AS total_spent
+         FROM transactions
         GROUP BY user_name
         ORDER BY total_spent DESC
         LIMIT 5
